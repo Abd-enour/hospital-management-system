@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="simple-base" id="E533C8C8-71E4-571D-891B-5AA0E14462B8" version="3.5">
+<createdBy>kroos</createdBy>
+<createdTime>2024-10-28 18:37:19 UTC</createdTime>
+<ownerDesignName>simple-base</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>E533C8C8-71E4-571D-891B-5AA0E14462B8</designId>
+</OSDM_Design>
