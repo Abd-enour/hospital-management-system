@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediCore — Hospital Management System</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<div id="toasts" class="toast-wrap"></div>
+
+<!-- ══════════════════════════════════════
+     AUTH
+══════════════════════════════════════ -->
+<div id="auth-view" class="auth-wrap" style="display:none">
+  <div class="auth-panel">
+    <div class="auth-panel-logo">
+      <div class="auth-panel-logo-mark">🏥</div>
+      <span class="auth-panel-logo-name">MediCore HMS</span>
+    </div>
+    <div class="auth-panel-headline">
+      <h1>Complete hospital management in one place.</h1>
+      <p>Manage patients, doctors, appointments, medical records, prescriptions, lab tests and billing — all from one platform built for every role.</p>
+    </div>
+    <div class="auth-panel-features">
+      <div class="auth-panel-feature"><div class="auth-panel-feature-dot"></div>5 role-based dashboards</div>
+      <div class="auth-panel-feature"><div class="auth-panel-feature-dot"></div>Real-time appointment slot booking</div>
+      <div class="auth-panel-feature"><div class="auth-panel-feature-dot"></div>Medical records, prescriptions & lab tests</div>
+      <div class="auth-panel-feature"><div class="auth-panel-feature-dot"></div>Ward admissions and billing</div>
+      <div class="auth-panel-feature"><div class="auth-panel-feature-dot"></div>Insurance verification</div>
+      <div class="auth-panel-feature"><div class="auth-panel-feature-dot"></div>Mobile friendly</div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+      <div class="auth-form-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to access your dashboard</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="authTab('login')">Sign in</button>
+        <button class="auth-tab" data-tab="register" onclick="authTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginSection">
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input id="l-email" type="email" class="form-input" placeholder="you@hospital.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="l-pass" type="password" class="form-input" placeholder="Your password"/>
+        </div>
+        <button id="login-btn" class="btn btn-primary" onclick="doLogin()">Sign in</button>
+        <div class="demo-box">
+          <strong>Demo accounts</strong> — all use password: <strong>password</strong><br>
+          Admin: <strong>admin@hms.com</strong><br>
+          Doctor: <strong>anna@hms.com</strong> or <strong>piotr@hms.com</strong><br>
+          Nurse: <strong>maria@hms.com</strong><br>
+          Receptionist: <strong>jan@hms.com</strong><br>
+          Patient: <strong>tomasz@hms.com</strong>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerSection" class="hidden">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Full name *</label>
+            <input id="r-name" type="text" class="form-input" placeholder="John Smith"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I am a *</label>
+            <select id="r-role" class="form-input">
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+              <option value="nurse">Nurse</option>
+              <option value="receptionist">Receptionist</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address *</label>
+          <input id="r-email" type="email" class="form-input" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password * <span>(min. 6 characters)</span></label>
+          <input id="r-pass" type="password" class="form-input" placeholder="Choose a password"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone <span>(optional)</span></label>
+            <input id="r-phone" type="text" class="form-input" placeholder="+48 123 456 789"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Blood type <span>(optional)</span></label>
+            <select id="r-blood" class="form-input">
+              <option value="">Unknown</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of birth <span>(optional)</span></label>
+          <input id="r-dob" type="date" class="form-input"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address <span>(optional)</span></label>
+          <input id="r-addr" type="text" class="form-input" placeholder="Your address"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Insurance provider <span>(optional)</span></label>
+          <input id="r-ins" type="text" class="form-input" placeholder="e.g. NFZ"/>
+        </div>
+        <button id="register-btn" class="btn btn-primary" onclick="doRegister()">Create account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
+<div id="app-view" class="app" style="display:none">
+
+  <!-- Mobile top bar -->
+  <div class="mobile-bar">
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="mobile-logo">🏥 MediCore</span>
+    <span id="mob-name" style="margin-left:auto;font-size:13px;color:var(--c-text-3)"></span>
+  </div>
+  <div class="sidebar-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">🏥</div>
+      <div class="sidebar-logo-text">MediCore<span>Hospital Management</span></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- ADMIN -->
+      <div class="nav-label" data-roles="admin">Overview</div>
+      <button class="nav-btn" data-page="dashboard" data-roles="admin" onclick="goTo('dashboard')"><span class="nav-icon">📊</span>Dashboard</button>
+      <div class="nav-label" data-roles="admin,receptionist">Hospital</div>
+      <button class="nav-btn" data-page="patients" data-roles="admin,receptionist" onclick="goTo('patients')"><span class="nav-icon">👤</span>Patients</button>
+      <button class="nav-btn" data-page="doctors" data-roles="admin" onclick="goTo('doctors')"><span class="nav-icon">🩺</span>Doctors</button>
+      <button class="nav-btn" data-page="appointments" data-roles="admin,receptionist" onclick="goTo('appointments')"><span class="nav-icon">📅</span>Appointments</button>
+      <div class="nav-label" data-roles="admin">Medical</div>
+      <button class="nav-btn" data-page="records" data-roles="admin" onclick="goTo('records')"><span class="nav-icon">📋</span>Medical Records</button>
+      <button class="nav-btn" data-page="prescriptions" data-roles="admin" onclick="goTo('prescriptions')"><span class="nav-icon">💊</span>Prescriptions</button>
+      <button class="nav-btn" data-page="lab-tests" data-roles="admin" onclick="goTo('lab-tests')"><span class="nav-icon">🧪</span>Lab Tests</button>
+      <div class="nav-label" data-roles="admin,receptionist">Operations</div>
+      <button class="nav-btn" data-page="payments" data-roles="admin,receptionist" onclick="goTo('payments')"><span class="nav-icon">💳</span>Payments</button>
+      <button class="nav-btn" data-page="rooms" data-roles="admin" onclick="goTo('rooms')"><span class="nav-icon">🏠</span>Rooms</button>
+      <button class="nav-btn" data-page="admissions" data-roles="admin" onclick="goTo('admissions')"><span class="nav-icon">🛏️</span>Admissions</button>
+
+      <!-- DOCTOR -->
+      <div class="nav-label" data-roles="doctor">My Work</div>
+      <button class="nav-btn" data-page="dr-home" data-roles="doctor" onclick="goTo('dr-home')"><span class="nav-icon">📊</span>Dashboard</button>
+      <button class="nav-btn" data-page="records" data-roles="doctor" onclick="goTo('records')"><span class="nav-icon">📋</span>Medical Records</button>
+      <button class="nav-btn" data-page="prescriptions" data-roles="doctor" onclick="goTo('prescriptions')"><span class="nav-icon">💊</span>Prescriptions</button>
+      <button class="nav-btn" data-page="lab-tests" data-roles="doctor" onclick="goTo('lab-tests')"><span class="nav-icon">🧪</span>Lab Tests</button>
+
+      <!-- NURSE -->
+      <div class="nav-label" data-roles="nurse">Ward</div>
+      <button class="nav-btn" data-page="nurse-home" data-roles="nurse" onclick="goTo('nurse-home')"><span class="nav-icon">📊</span>Dashboard</button>
+
+      <!-- RECEPTIONIST -->
+      <div class="nav-label" data-roles="receptionist">Front Desk</div>
+      <button class="nav-btn" data-page="rec-home" data-roles="receptionist" onclick="goTo('rec-home')"><span class="nav-icon">📊</span>Dashboard</button>
+      <button class="nav-btn" data-page="payments" data-roles="receptionist" onclick="goTo('payments')"><span class="nav-icon">💳</span>Payments</button>
+
+      <!-- PATIENT -->
+      <div class="nav-label" data-roles="patient">My Health</div>
+      <button class="nav-btn" data-page="pat-home" data-roles="patient" onclick="goTo('pat-home')"><span class="nav-icon">🏠</span>Home</button>
+      <button class="nav-btn" data-page="pat-appts" data-roles="patient" onclick="goTo('pat-appts')"><span class="nav-icon">📅</span>My Appointments</button>
+      <button class="nav-btn" data-page="pat-records" data-roles="patient" onclick="goTo('pat-records')"><span class="nav-icon">📋</span>Medical Records</button>
+      <button class="nav-btn" data-page="pat-prescriptions" data-roles="patient" onclick="goTo('pat-prescriptions')"><span class="nav-icon">💊</span>Prescriptions</button>
+      <button class="nav-btn" data-page="pat-payments" data-roles="patient" onclick="goTo('pat-payments')"><span class="nav-icon">💳</span>My Bills</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-av av-admin" id="u-av">A</div>
+        <div class="user-info">
+          <div class="user-nm" id="u-name">User</div>
+          <div class="user-rl" id="u-role">role</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+
+    <!-- ══ ADMIN DASHBOARD ══ -->
+    <div id="pg-dashboard" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>Dashboard</h1><p>Hospital overview</p></div></div>
+      <div class="page-body">
+        <div class="stats s3" style="margin-bottom:12px">
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="s-pat">—</div><div class="stat-lbl">Total Patients</div></div><div class="stat-icon" style="background:var(--c-blue-bg)">👤</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="s-doc">—</div><div class="stat-lbl">Doctors</div></div><div class="stat-icon" style="background:var(--c-accent-bg)">🩺</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="s-appt">—</div><div class="stat-lbl">Appointments</div></div><div class="stat-icon" style="background:var(--c-yellow-bg)">📅</div></div></div>
+        </div>
+        <div class="stats s3">
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="s-sched">—</div><div class="stat-lbl">Scheduled</div></div><div class="stat-icon" style="background:var(--c-yellow-bg)">⏳</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="s-rec">—</div><div class="stat-lbl">Medical Records</div></div><div class="stat-icon" style="background:var(--c-purple-bg)">📋</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="s-adm">—</div><div class="stat-lbl">Admissions</div></div><div class="stat-icon" style="background:var(--c-blue-bg)">🛏️</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Recent Appointments</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & Time</th><th>Status</th></tr></thead><tbody id="dash-appts"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PATIENTS ══ -->
+    <div id="pg-patients" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Patients</h1><p>Manage registered patients</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openEditPt(0);document.getElementById('ep-id').value=''">+ Add Patient</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">All Patients</span>
+            <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search by name or email…" oninput="filterPts(this.value)"/></div>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Phone</th><th>Blood</th><th>Insurance</th><th>Address</th><th>Actions</th></tr></thead><tbody id="tb-pts"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DOCTORS ══ -->
+    <div id="pg-doctors" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>Doctors</h1><p>Medical staff directory</p></div></div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">All Doctors</span>
+            <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search…" oninput="filterDocs(this.value)"/></div>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Doctor</th><th>Specialization</th><th>Department</th><th>Phone</th></tr></thead><tbody id="tb-docs"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ APPOINTMENTS ══ -->
+    <div id="pg-appointments" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Appointments</h1><p>Schedule and manage</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openApptModal()">+ Book Appointment</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Appointments</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & Time</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tb-appts"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MEDICAL RECORDS ══ -->
+    <div id="pg-records" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Medical Records</h1><p>Diagnoses and treatment history</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openModal('m-rec')">+ Add Record</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Records</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Diagnosis</th><th>Treatment</th><th>Date</th></tr></thead><tbody id="tb-recs"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PRESCRIPTIONS ══ -->
+    <div id="pg-prescriptions" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Prescriptions</h1><p>Medication orders by doctors</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openModal('m-pres')">+ New Prescription</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Prescriptions</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Medication</th><th>Dosage</th><th>Instructions</th></tr></thead><tbody id="tb-pres"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LAB TESTS ══ -->
+    <div id="pg-lab-tests" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Lab Tests</h1><p>Diagnostic test orders</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openModal('m-lab')">+ Order Test</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Lab Tests</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Test Type</th><th>Status</th><th>Result</th></tr></thead><tbody id="tb-labs"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAYMENTS ══ -->
+    <div id="pg-payments" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Payments</h1><p>Billing and payment processing</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openModal('m-pay')">+ Create Bill</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Payments</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Amount</th><th>Method</th><th>Status</th><th>Insurance</th><th>Action</th></tr></thead><tbody id="tb-pay"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ROOMS ══ -->
+    <div id="pg-rooms" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>Rooms</h1><p>Ward and room availability</p></div></div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Rooms</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Room</th><th>Ward</th><th>Beds</th><th>Status</th></tr></thead><tbody id="tb-rooms"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMISSIONS ══ -->
+    <div id="pg-admissions" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Admissions</h1><p>Patient ward admissions</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openModal('m-adm')">+ Admit Patient</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Admissions</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Room / Ward</th><th>Admitted</th><th>Status</th><th>Action</th></tr></thead><tbody id="tb-adm"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DOCTOR DASHBOARD ══ -->
+    <div id="pg-dr-home" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>My Dashboard</h1><p>Your schedule and patients</p></div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="openModal('m-rec')">+ Add Record</button>
+          <button class="btn btn-primary" style="width:auto" onclick="openModal('m-lab')">+ Order Lab Test</button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="stats s3">
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="dr-s-appts">—</div><div class="stat-lbl">My Appointments</div></div><div class="stat-icon" style="background:var(--c-blue-bg)">📅</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="dr-s-sched">—</div><div class="stat-lbl">Scheduled</div></div><div class="stat-icon" style="background:var(--c-yellow-bg)">⏳</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="dr-s-recs">—</div><div class="stat-lbl">Records Written</div></div><div class="stat-icon" style="background:var(--c-accent-bg)">📋</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">My Appointments</span><button class="btn btn-secondary btn-sm" onclick="openModal('m-pres')">+ Prescription</button></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Date & Time</th><th>Status</th><th>Action</th></tr></thead><tbody id="tb-dr-appts"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NURSE DASHBOARD ══ -->
+    <div id="pg-nurse-home" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Ward Management</h1><p>Patient admissions and rooms</p></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openModal('m-adm')">+ Admit Patient</button></div>
+      </div>
+      <div class="page-body">
+        <div class="stats s2">
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="nu-s-adm">—</div><div class="stat-lbl">Currently Admitted</div></div><div class="stat-icon" style="background:var(--c-blue-bg)">🛏️</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="nu-s-rooms">—</div><div class="stat-lbl">Available Rooms</div></div><div class="stat-icon" style="background:var(--c-accent-bg)">🏠</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Current Admissions</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Room / Ward</th><th>Admitted</th><th>Status</th><th>Action</th></tr></thead><tbody id="tb-nu-adm"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RECEPTIONIST DASHBOARD ══ -->
+    <div id="pg-rec-home" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>Front Desk</h1><p>Patient registration and appointments</p></div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="goTo('patients')">+ Register Patient</button>
+          <button class="btn btn-primary" style="width:auto" onclick="openApptModal()">+ Book Appointment</button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="stats s4">
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="rc-s-pts">—</div><div class="stat-lbl">Patients</div></div><div class="stat-icon" style="background:var(--c-blue-bg)">👤</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="rc-s-appts">—</div><div class="stat-lbl">Appointments</div></div><div class="stat-icon" style="background:var(--c-yellow-bg)">📅</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="rc-s-today">—</div><div class="stat-lbl">Today</div></div><div class="stat-icon" style="background:var(--c-accent-bg)">📆</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="rc-s-pay">—</div><div class="stat-lbl">Pending Bills</div></div><div class="stat-icon" style="background:var(--c-red-bg)">💳</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Today's Schedule</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & Time</th><th>Status</th></tr></thead><tbody id="tb-rc-appts"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PATIENT HOME ══ -->
+    <div id="pg-pat-home" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>My Health Portal</h1></div></div>
+      <div class="page-body">
+        <div class="welcome-banner">
+          <h2>Hello, <span id="pat-welcome"></span> 👋</h2>
+          <p>Here's an overview of your health activity.</p>
+          <span class="welcome-tag">Patient Portal</span>
+        </div>
+        <div class="stats s3">
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="pat-s-appts">—</div><div class="stat-lbl">Appointments</div></div><div class="stat-icon" style="background:var(--c-blue-bg)">📅</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="pat-s-upc">—</div><div class="stat-lbl">Upcoming</div></div><div class="stat-icon" style="background:var(--c-yellow-bg)">⏳</div></div></div>
+          <div class="stat"><div class="stat-top"><div><div class="stat-val" id="pat-s-recs">—</div><div class="stat-lbl">Medical Records</div></div><div class="stat-icon" style="background:var(--c-accent-bg)">📋</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Upcoming Appointments</span><button class="btn btn-primary btn-sm" style="width:auto" onclick="openPatBook()">+ Book Appointment</button></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Doctor</th><th>Date & Time</th><th>Status</th></tr></thead><tbody id="tb-pat-recent"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PATIENT APPOINTMENTS ══ -->
+    <div id="pg-pat-appts" class="pg">
+      <div class="page-head">
+        <div class="page-head-left"><h1>My Appointments</h1></div>
+        <div class="page-actions"><button class="btn btn-primary" style="width:auto" onclick="openPatBook()">+ Book Appointment</button></div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">All Appointments</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Doctor</th><th>Date & Time</th><th>Status</th><th>Notes</th></tr></thead><tbody id="tb-pat-appts"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PATIENT RECORDS ══ -->
+    <div id="pg-pat-records" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>My Medical Records</h1><p>Diagnoses and treatment history</p></div></div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Medical Records</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Doctor</th><th>Diagnosis</th><th>Treatment</th><th>Date</th></tr></thead><tbody id="tb-pat-recs"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PATIENT PRESCRIPTIONS ══ -->
+    <div id="pg-pat-prescriptions" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>My Prescriptions</h1><p>Medications from your doctor</p></div></div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Prescriptions</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Doctor</th><th>Medication</th><th>Dosage</th><th>Instructions</th></tr></thead><tbody id="tb-pat-pres"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PATIENT PAYMENTS ══ -->
+    <div id="pg-pat-payments" class="pg">
+      <div class="page-head"><div class="page-head-left"><h1>My Bills</h1><p>Payment history</p></div></div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Payments</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead><tbody id="tb-pat-pay"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-area -->
+</div><!-- /app-view -->
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Edit/Add Patient -->
+<div id="m-edit-pt" class="modal-overlay" onclick="if(event.target===this)closeModal('m-edit-pt')">
+  <div class="modal">
+    <div class="modal-head"><h3>Edit Patient</h3><button class="modal-close" onclick="closeModal('m-edit-pt')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ep-id"/>
+      <div class="form-group"><label class="form-label">Full Name</label><input id="ep-name" type="text" class="form-input"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Phone</label><input id="ep-phone" type="text" class="form-input"/></div>
+        <div class="form-group"><label class="form-label">Blood Type</label><select id="ep-blood" class="form-input"><option value="">—</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Date of Birth</label><input id="ep-dob" type="date" class="form-input"/></div>
+      <div class="form-group"><label class="form-label">Address</label><input id="ep-addr" type="text" class="form-input"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Insurance Provider</label><input id="ep-ins" type="text" class="form-input"/></div>
+        <div class="form-group"><label class="form-label">Insurance Number</label><input id="ep-ins-num" type="text" class="form-input"/></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-edit-pt')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="savePt()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Book Appointment (Admin/Receptionist) -->
+<div id="m-appt" class="modal-overlay" onclick="if(event.target===this)closeModal('m-appt')">
+  <div class="modal">
+    <div class="modal-head"><h3>Book Appointment</h3><button class="modal-close" onclick="closeModal('m-appt')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Patient</label><select id="na-pt" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Doctor</label><select id="na-doc" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Date</label><input id="na-date" type="date" class="form-input"/></div>
+      <div class="form-group"><label class="form-label">Available Time Slots</label><div id="na-slots"><p class="slots-empty">Select a doctor and date first.</p></div></div>
+      <div class="form-group"><label class="form-label">Notes <span>(optional)</span></label><textarea id="na-notes" class="form-input" placeholder="Reason for visit…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-appt')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="bookAppt()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Book Appointment (Patient) -->
+<div id="m-pat-book" class="modal-overlay" onclick="if(event.target===this)closeModal('m-pat-book')">
+  <div class="modal">
+    <div class="modal-head"><h3>Book an Appointment</h3><button class="modal-close" onclick="closeModal('m-pat-book')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Select Doctor</label><select id="pb-doc" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Select Date</label><input id="pb-date" type="date" class="form-input"/></div>
+      <div class="form-group"><label class="form-label">Available Time Slots</label><div id="pb-slots"><p class="slots-empty">Select a doctor and date to see available slots.</p></div></div>
+      <div class="form-group"><label class="form-label">Reason for visit <span>(optional)</span></label><textarea id="pb-notes" class="form-input" placeholder="Describe your symptoms or reason for the visit…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-pat-book')">Cancel</button>
+      <button id="pb-book-btn" class="btn btn-primary" style="width:auto" onclick="patBookAppt()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Medical Record -->
+<div id="m-rec" class="modal-overlay" onclick="if(event.target===this)closeModal('m-rec')">
+  <div class="modal">
+    <div class="modal-head"><h3>Add Medical Record</h3><button class="modal-close" onclick="closeModal('m-rec')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Patient *</label><select id="nr-pt" class="form-input"></select></div>
+        <div class="form-group"><label class="form-label">Doctor *</label><select id="nr-doc" class="form-input"></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Diagnosis</label><textarea id="nr-diag" class="form-input" placeholder="Enter diagnosis…"></textarea></div>
+      <div class="form-group"><label class="form-label">Treatment</label><textarea id="nr-treat" class="form-input" placeholder="Enter treatment plan…"></textarea></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea id="nr-notes" class="form-input" placeholder="Additional notes…"></textarea></div>
+      <div class="form-group"><label class="form-label">Date *</label><input id="nr-date" type="date" class="form-input"/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-rec')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveRecord()">Save Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prescription -->
+<div id="m-pres" class="modal-overlay" onclick="if(event.target===this)closeModal('m-pres')">
+  <div class="modal">
+    <div class="modal-head"><h3>New Prescription</h3><button class="modal-close" onclick="closeModal('m-pres')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Medical Record *</label><select id="pr-rec" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Patient *</label><select id="pr-pt" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Medication *</label><input id="pr-med" type="text" class="form-input" placeholder="e.g. Amoxicillin 500mg"/></div>
+      <div class="form-group"><label class="form-label">Dosage</label><input id="pr-dos" type="text" class="form-input" placeholder="e.g. 3 times daily"/></div>
+      <div class="form-group"><label class="form-label">Instructions</label><textarea id="pr-inst" class="form-input" placeholder="e.g. Take with food…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-pres')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="savePresc()">Create Prescription</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lab Test -->
+<div id="m-lab" class="modal-overlay" onclick="if(event.target===this)closeModal('m-lab')">
+  <div class="modal">
+    <div class="modal-head"><h3>Order Lab Test</h3><button class="modal-close" onclick="closeModal('m-lab')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Patient *</label><select id="lt-pt" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Test Type *</label>
+        <select id="lt-type" class="form-input">
+          <option value="">Select a test…</option>
+          <option>Complete Blood Count (CBC)</option>
+          <option>Blood Glucose Test</option>
+          <option>Liver Function Test</option>
+          <option>Kidney Function Test</option>
+          <option>Lipid Profile</option>
+          <option>Thyroid Function Test</option>
+          <option>Urine Analysis</option>
+          <option>X-Ray</option>
+          <option>MRI Scan</option>
+          <option>CT Scan</option>
+          <option>ECG / EKG</option>
+          <option>COVID-19 PCR Test</option>
+          <option>Blood Culture</option>
+          <option>Coagulation Test</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-lab')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveLabTest()">Order Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment -->
+<div id="m-pay" class="modal-overlay" onclick="if(event.target===this)closeModal('m-pay')">
+  <div class="modal">
+    <div class="modal-head"><h3>Create Bill</h3><button class="modal-close" onclick="closeModal('m-pay')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Patient *</label><select id="pay-pt" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Amount (PLN) *</label><input id="pay-amt" type="number" class="form-input" placeholder="0.00" step="0.01" min="0.01"/></div>
+      <div class="form-group"><label class="form-label">Payment Method</label>
+        <select id="pay-mth" class="form-input">
+          <option value="cash">Cash</option>
+          <option value="card">Card</option>
+          <option value="insurance">Insurance</option>
+          <option value="bank_transfer">Bank Transfer</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-pay')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="createBill()">Create Bill</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admission -->
+<div id="m-adm" class="modal-overlay" onclick="if(event.target===this)closeModal('m-adm')">
+  <div class="modal">
+    <div class="modal-head"><h3>Admit Patient</h3><button class="modal-close" onclick="closeModal('m-adm')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Patient *</label><select id="adm-pt" class="form-input"></select></div>
+      <div class="form-group"><label class="form-label">Room * <span>(only available rooms shown)</span></label><select id="adm-rm" class="form-input"></select></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('m-adm')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="admitPatient()">Admit Patient</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
